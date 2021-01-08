@@ -44,13 +44,13 @@ class MainActivity : AppCompatActivity() {
         tvLetrasErradas.text = ""
         erros = 0
         // a aplicação sorteia uma palavra a partir de uma lista com 20 palavras
-        palavraSorteada = "abcabaeae"//listaDePalavras[random.nextInt(20)]
+        palavraSorteada = listaDePalavras[random.nextInt(20)]
         // interrompe a animação e mostra a forca sem o boneco
         val forcaAnimacao = forcaImagem.drawable
         if (forcaAnimacao is Animatable) forcaAnimacao.stop()
         forcaImagem.setImageResource(R.drawable.forca7)
         // forneça a palavra sorteada na forma de uma sequencia de __
-        var palavraOculta = StringBuffer()
+        val palavraOculta = StringBuffer()
         for (i in 1..palavraSorteada.length) palavraOculta.append("_")
         palavraSorteadaMostrada.text = palavraOculta
         // mostrar o botão para jogar e demais campos invisíveis
@@ -67,13 +67,23 @@ class MainActivity : AppCompatActivity() {
 
         if (etLetra.text.toString().length != 0) {
             val letra = etLetra.text.toString()[0]
+            etLetra.setText("")
 
 //************** aqui começa a prova *****************************//
             // Esta é a parte do código a ser implementada, a prova é basicamente montar este trecho da lógica do app e o layout da tela.
-            // 1- obter as posições da palavra sorteada que contêm a letra "chutada" pelo jogador (tem uma função utilitária no fim deste códgio).
+            // 1- obter as posições da palavra sorteada que contêm a letra "chutada" pelo jogador (tem uma função utilitária no fim deste código).
+            val posicoes = palavraSorteada.indexesOf(letra.toString())
             // 2- se tiver uma ou mais posições, deve-se adicionar a letra nas posições corretas na palavra sorteada
-            // (id do componente da tela é tv_palavra_sorteada).
-            // 3- testar se o jogador ganhou  (usar um return no fim da lógica se o jogador acerta uma letra)
+            if (posicoes.size > 0) {// o jogador acertou pelo menos uma letra da palavra
+                for (posicao in posicoes) {
+                    val palavra: CharArray = palavraSorteadaMostrada.text.toString().toCharArray()
+                    palavra[posicao] = letra
+                    palavraSorteadaMostrada.text = String(palavra)
+                }
+                // 3- testar se o jogador ganhou  (usar um return no fim da lógica se o jogador acerta uma letra)
+                ganhou()
+                return
+            }
 //************** aqui termina a prova *****************************//
 
             //jogador errou a letra, troca a imagem do boneco
@@ -95,13 +105,13 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun ganhou() {
-        var palavraOculta = palavraSorteadaMostrada.text.toString()
+        val palavraOculta = palavraSorteadaMostrada.text.toString()
         if (palavraOculta.indexOf(char = '_') == -1)
             fimDeJogo(true)
     }
 
     private fun fimDeJogo(ganhou: Boolean = false) {
-        Toast.makeText(this, "Fim de jogo", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Fim de jogo", Toast.LENGTH_SHORT).show()
         btJogar.visibility = View.INVISIBLE
         animacao(R.drawable.lista_animacao)
         etLetra.visibility = View.INVISIBLE
@@ -110,7 +120,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // "aaa".indexesOf("aa") retorna [0, 1]
-    public fun String?.indexesOf(substr: String, ignoreCase: Boolean = true): List<Int> {
+    fun String?.indexesOf(substr: String, ignoreCase: Boolean = true): List<Int> {
         return this?.let {
             val regex = if (ignoreCase) Regex(substr, RegexOption.IGNORE_CASE) else Regex(substr)
             regex.findAll(this).map { it.range.start }.toList()
